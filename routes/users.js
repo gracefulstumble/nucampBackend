@@ -1,15 +1,20 @@
 const express = require('express');
 const User = require('../models/user');
-
 const router = express.Router();
 const passport = require('passport');
-
 const authenticate = require('../authenticate');
+
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-    res.send('respond with a resource');
-});
+  if (req.user.admin) {
+    return User.find();
+} else {
+    const err = new Error('Admin access only!');
+    err.status = 403;
+    return next(err);
+}
+}); //admin access to user documents
 
 router.post('/signup', (req, res) => {
   User.register(
