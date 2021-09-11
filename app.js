@@ -22,6 +22,9 @@ var usersRouter = require('./routes/users');
 const campsiteRouter = require('./routes/campsiteRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
+const passport = require('passport');
+const authenticate = require('./authenticate');
+
 var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -33,6 +36,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+
+
 app.use(session({
   name: 'session-id',
   secret: '12345-67890-09876-54321',
@@ -42,22 +47,21 @@ app.use(session({
 }));
 
 //authentication
+app.use(passport.initialize());
+app.use(passport.session());
+
 function auth(req, res, next) {
-  console.log(req.session);
-  if (!req.session.user) {
-    const err = new Error('You are not authenticated!');
+  console.log(req.user);
+
+  if (!req.user) {
+      const err = new Error('You are not authenticated!');                    
       err.status = 401;
       return next(err);
   } else {
-      if (req.session.user === 'authenticated') {
-          return next();
-      } else {
-          const err = new Error('You are not authenticated!');
-          err.status = 401;
-          return next(err);
-      }
+      return next();
   }
 }
+
 app.use(auth);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
@@ -79,4 +83,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
 module.exports = app;
