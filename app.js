@@ -1,7 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var logger = require('morgan');
+var logger = require('morgan');const config = require('./config');
 const mongoose = require('mongoose');
 const url = config.mongoUrl;
 const connect = mongoose.connect(url, {
@@ -19,7 +19,9 @@ const campsiteRouter = require('./routes/campsiteRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 const passport = require('passport');
-const config = require('./config');
+
+const uploadRouter = require('./routes/uploadRouter');
+
 
 var app = express();
 // view engine setup
@@ -31,7 +33,7 @@ app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser('12345-67890-09876-54321')); 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
+app.use('/imageUpload', uploadRouter);
 
 
 //authentication
@@ -58,6 +60,16 @@ app.use(function(err, req, res, next) {
   
   res.status(err.status || 500);
   res.render('error');
+});
+
+// Secure traffic only
+app.all('*', (req, res, next) => {
+  if (req.secure) {
+    return next();
+  } else {
+      console.log(`Redirecting to: https://${req.hostname}:${app.get('secPort')}${req.url}`);
+      res.redirect(301, `https://${req.hostname}:${app.get('secPort')}${req.url}`);
+  }
 });
 
 
