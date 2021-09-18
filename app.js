@@ -21,7 +21,7 @@ const partnerRouter = require('./routes/partnerRouter');
 const passport = require('passport');
 
 const uploadRouter = require('./routes/uploadRouter');
-
+const favoriteRouter = require('./routes/favoriteRouter');
 
 var app = express();
 // view engine setup
@@ -35,11 +35,12 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/imageUpload', uploadRouter);
 
+app.use('/favorites', favoriteRouter);
 
 //authentication
 app.use(passport.initialize());
 
-
+app.use('/', indexRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
